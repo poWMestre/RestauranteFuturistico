@@ -3,23 +3,47 @@
 #include <fstream>
 #include <unistd.h>
 #include <string>
+#include <signal.h>
+
+class Atendimento{
+
+    private:
+
+        int fd[2]{-1, -1};
+        pid_t pid;
+        unsigned int idCozinheiro;
+        unsigned int idMesa;
+
+
+    public:
+
+        Atendimento(unsigned int idCozinheiro, unsigned int idMesa);
+
+        ~Atendimento();
+
+        void prepararPedidoEscrita(const std::string &pedido);
+
+        void iniciar();
+
+
+};
+
 class Cozinheiro{
     
     private:
 
         const unsigned int ID_COZINHEIRO;
-
-        int fdComunicacao[2];
+        Atendimento *atendimento;
     
     public:
 
-        Cozinheiro();
 
-        Cozinheiro(int idCozinheiro);
+        Cozinheiro(unsigned int idCozinheiro);
 
-        void prepararPedido(std::string pedido);
+        void prepararPedido(const std::string &pedido, int numMesa);
 
-        int* getFD();
+        void iniciarAtendimento(unsigned int mesa);
 
+        void finalizarAtendimento();
 
 };

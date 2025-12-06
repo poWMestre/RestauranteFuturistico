@@ -1,15 +1,4 @@
-#include "../include/Restaurante.h"
-
-std::optional<Cozinheiro> Restaurante::getCozinheiro(){
-            
-    if(this->cozinheirosLivre.empty()){
-        return std::nullopt;
-    }
-
-    Cozinheiro &tmpCozinheiro = this->cozinheirosLivre.front();
-    this->cozinheirosLivre.pop();
-    return tmpCozinheiro;
-} 
+#include "../include/Restaurante.hpp"
 
 Restaurante::Restaurante(int qntMesas, int qntChefes){
             
@@ -17,15 +6,13 @@ Restaurante::Restaurante(int qntMesas, int qntChefes){
 
     for(i = 1; i <= qntMesas; i++){
 
-        this->mesas.emplace(std::piecewise_construct, //Estudar isso.
-                            std::forward_as_tuple(i),
-                            std::forward_as_tuple(i));
+        this->mapMesas.insert({i, Mesa(i)});
 
     }
 
     for(j = 1; j <= qntChefes; j++){
 
-        this->cozinheirosLivre.emplace(Cozinheiro(j));
+        this->listaCozinheiro.push(Cozinheiro(j));
 
         std::ofstream outputFile("Cozinheiro_" + std::to_string(j) + ".txt");
 
@@ -33,29 +20,77 @@ Restaurante::Restaurante(int qntMesas, int qntChefes){
 
 };
 
-void Restaurante::receberPedido(int numMesa, std::string pedido){
-    
-    Mesa &mesaDaVez = this->mesas[numMesa];
 
-    if(!mesaDaVez.MesaTemCozinheiro().has_value()){
+void Restaurante::receberPedido(int numMesa, const std::string pedido){
+    
+    Mesa* mesaDaVez = &this->mapMesas[numMesa];
+    std::optional<Cozinheiro*> cozinheiro;
+
+    std::optional<Cozinheiro*> cozinheiroDaMesa = mesaDaVez->temCozinheiroLivre();
+
+
+    //Verifica se não tem cozinheiro já atendendo a mesa
+    if(!cozinheiroDaMesa.has_value()){
         
-        std::optional<Cozinheiro> cozinheiro = getCozinheiro();
-       
-        if(!cozinheiro.has_value()){
-            //Colocar na fila de espera
-            return;
+        //verifica se tem mesa em fila de espera
+        if(!this-> ListaMesaEmEspera.empty()){
+
+            if(!mesaDaVez->estadoDaMesa){
+
+                mesaDaVez->adicionarPedidoEmEspera(pedido);
+
+                this->ListaMesaEmEspera.push(numMesa);
+
+                mesaDaVez->estadoDaMesa = true;
+
+            }
+               
+            numMesa = this->ListaMesaEmEspera.front();
+
+            this->ListaMesaEmEspera.pop();
+
+            mesaDaVez = &this->mapMesas[numMesa];
         }
 
-        mesaDaVez.setCozinheiro(cozinheiro.value());
-    } 
+        cozinheiro = temCozinheiroLivre();
 
-    Cozinheiro cozinheiro = mesaDaVez.MesaTemCozinheiro().value();
+        if(!cozinheiro.has_value()){
+            
+            mesaDaVez->adicionarPedidoEmEspera(pedido);
+            
+            return;    
 
-    cozinheiro.prepararPedido(numMesa, pedido);
+        }else{
 
-    
+            mesaDaVez->setCozinheiro(*cozinheiro.value());
 
+        }
+
+    }
+
+    mesaDaVez->adicionarPedidoEmEspera(pedido);
+
+    std::string pedidoEmEspera;
+
+    while((pedidoEmEspera = mesaDaVez->getPedidoEspera()) != ""){
+
+        cozinheiro.value()->prepararPedido(pedidoEmEspera, numMesa);
+
+    }
 
 }
 
-   
+
+
+std::optional<Cozinheiro*> Restaurante::temCozinheiroLivre(){
+
+    if(listaCozinheiro.empty()){
+        return std::nullopt;
+    }
+
+    Cozinheiro cozinheiro = this->listaCozinheiro.front();
+    this->listaCozinheiro.pop();
+
+    return &cozinheiro;
+
+}

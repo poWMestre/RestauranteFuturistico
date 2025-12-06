@@ -9,23 +9,22 @@ class Mesa{
 
 
     private:
-        const unsigned int ID_MESA;
-        int estadoDaMesa; // 0 = mesa parada 
-                              // 1 = Mesa na fila
-                               
+        const unsigned int ID_MESA;                              
 
-        std::optional<Cozinheiro> cozinheiro;
+        std::optional<Cozinheiro*> cozinheiro;
 
         std::queue<std::string> pedidos;
-        
-    
+
+
     public:  
 
+        bool estadoDaMesa = false; //Serve para monitorar se a mesa
+                                   // já está na fila de espera
         Mesa();
 
         Mesa(int idMesa);
 
-        std::optional<Cozinheiro> MesaTemCozinheiro();
+        std::optional<Cozinheiro*> temCozinheiroLivre();
 
         void setCozinheiro(Cozinheiro cozinheiro);
 
@@ -33,10 +32,8 @@ class Mesa{
 
         void adicionarPedidoEmEspera(const std::string pedido);
 
-        void getPedidoEspera();
+        std::string getPedidoEspera();
 
-        void trocarEstadoDaMesa(int* num);
 
-        void getEstadoDaMesa();
-
+       
 };

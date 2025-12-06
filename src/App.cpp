@@ -1,4 +1,4 @@
-#include "../include/App.h"
+#include "../include/App.hpp"
 
 App::App(){
             
@@ -19,15 +19,11 @@ App::App(){
         std::string pedido;
         std::getline(std::cin , pedido);
                 
-        if(pedido == "FIM"){
-            break;
-        }
+        if(pedido == "FIM"){break;}
 
         std::array<std::string, 2> textoQuebrado = devolverStringSeparada(pedido);
 
-        int numMesa;
-
-        numMesa = std::stoi(textoQuebrado[0]);
+        int numMesa = std::stoi(textoQuebrado[0]);
 
         restaurante.receberPedido(numMesa, textoQuebrado[1]);
 

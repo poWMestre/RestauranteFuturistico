@@ -16,11 +16,11 @@ class Restaurante{
 
     private:
     
-        std::map<const int, Mesa> mesas;
-        std::queue<Cozinheiro> cozinheirosLivre;
-        std::queue<int> mesaEmEspera;        
-        std::optional<Cozinheiro> getCozinheiro();
+        std::map<unsigned int, Mesa> mapMesas;
+        std::queue<Cozinheiro> listaCozinheiro;
+        std::queue<int> ListaMesaEmEspera;
 
+        std::optional<Cozinheiro*> temCozinheiroLivre();
 
     public:
     
@@ -28,7 +28,7 @@ class Restaurante{
 
         void receberPedido(int numMesa, std::string pedido);
 
-        void finalizarMesa(int numMesa);
+        
         
 
 };
